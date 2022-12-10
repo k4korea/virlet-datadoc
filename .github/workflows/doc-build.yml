@@ -110,23 +110,23 @@ jobs:
 #          sudo ssh -T git@gitlab.aiops-mz.com
 
 
-      - name: helm repository image update
-        uses: actions/checkout@v3
-        with: 
-          repository: k4korea/su-argo
-#          path: service/virtlet/dev/values.yaml
-          ref: main
-          ssh-key: ${{ secrets.GHUB_PRIVATE_SSH_KEY }}
-          persist-credentials: false
-          submodules: true
-          github-server-url: 'https://github.com/k4korea/su-argo.git'
+#!       - name: helm repository image update
+#!         uses: actions/checkout@v3
+#!         with: 
+#!           repository: k4korea/su-argo
+#! #          path: service/virtlet/dev/values.yaml
+#!           ref: main
+#!           ssh-key: ${{ secrets.GHUB_PRIVATE_SSH_KEY }}
+#!           persist-credentials: false
+#!           submodules: true
+#!           github-server-url: 'https://github.com/k4korea/su-argo.git'
 
-      - run: |
-         ls -al service/virtlet/dev/*
+#!       - run: |
+#!          ls -al service/virtlet/dev/*
          
-         ls -al
-         cat ./service/virtlet/dev/values.yaml
-         echo ${{ env.git_hash }}
+#!          ls -al
+#!          cat ./service/virtlet/dev/values.yaml
+#!          echo ${{ env.git_hash }}
         
       
 #  tag: "90faee8"  # 4-> 3x -> 2 x
