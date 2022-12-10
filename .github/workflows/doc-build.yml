@@ -52,7 +52,7 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }} #"love7310"  
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} #"love7310"   "rlawnsdud#08"
-        run: docker build . --file Dockerfile --tag love7310/virtlet:${{ env.git_hash }}   #  env.TAG_VERSION <= 값이 없음..
+        run: docker build . --file Dockerfile --tag love7310/virtlet-datadoc:${{ env.git_hash }}   #  env.TAG_VERSION <= 값이 없음..
 
 
 
@@ -72,7 +72,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: love7310/virtlet
+          images: love7310/virtlet-datadoc
 
 
       - name: Docker push
