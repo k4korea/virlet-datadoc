@@ -63,10 +63,10 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         with:
-          username: "love7310" #${{ env.DOCKER_USER }}
+          username: ${{ env.HUBDOCKER_ID }}
           #password: ${{ secrets.DOCKER_PASSWORD }}
           #username: $DOCKER_USER  # "love7310"    x:  ${{ DOCKER_USER }}  x: ${DOCKER_USER} x: $DOCKER_USER
-          password: "rlawnsdud#08"
+          password: ${{ env.HUBDOCKER_ID }} #"rlawnsdud#08"
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
