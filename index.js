@@ -4,6 +4,7 @@ var app = express();
 
 //import './tracer'; 
 
+
 const tracer = require('dd-trace').init();
 
 app.get('/index',function(req,res){
