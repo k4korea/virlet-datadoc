@@ -79,7 +79,6 @@ jobs:
         id: docker-push
         run: docker push love7310/virtlet:${{ env.git_hash }}
 
-
   to_gitlab:
     runs-on: ubuntu-latest
     steps:     
