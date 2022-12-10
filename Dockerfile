@@ -11,3 +11,4 @@ CMD curl -f http://127.0.0.1:80 || exit 1
 #ENTRYPOINT [  "node index.js" ]
 EXPOSE 80
 CMD [ "node", "index.js" ]
+#CMD [ "node", "-require dd-trace/init index.js]
