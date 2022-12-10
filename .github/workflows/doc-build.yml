@@ -77,7 +77,7 @@ jobs:
 
       - name: Docker push
         id: docker-push
-        run: docker push love7310/virtlet:${{ env.git_hash }}
+        run: docker push love7310/virtlet-datadoc:${{ env.git_hash }}
 
   to_gitlab:
     runs-on: ubuntu-latest
