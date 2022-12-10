@@ -1,25 +1,14 @@
 {
   "name": "simple-page",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" "
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dd-trace": "^3.9.3",
     "express": "^4.17.1"
-  },
-  "description": "1. start kube yaml\r   command: [\"node\"]\r   args: [\"index.js\"]    ######  deploy-rollout node",
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/k4korea/virlet-datadoc.git"
-  },
-  "keywords": [],
-  "bugs": {
-    "url": "https://github.com/k4korea/virlet-datadoc/issues"
-  },
-  "homepage": "https://github.com/k4korea/virlet-datadoc#readme"
+  }
 }
