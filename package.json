@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-#    "dd-trace": "^3.9.3",
+    "dd-trace": "^3.9.3",
     "express": "^4.17.1"
   }
 }
