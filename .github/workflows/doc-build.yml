@@ -1,0 +1,272 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+
+  pull_request:
+    branches: [ "master", "dev" ]
+    
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test   
+
+
+      - name: Set Output git hash
+        id: githash_env_output
+        run: echo git_hash=$(git rev-parse --short "$GITHUB_SHA") >> $GITHUB_ENV
+
+      - name: Set Output git hash2
+        id: githash_cmd_output
+        run: echo git_hash=$(git rev-parse --short "$GITHUB_SHA")
+
+      - name: Set Output git branch
+        id: gitbranch_env_output
+        run: echo git_branch=${GITHUB_REF#refs/heads/} >> $GITHUB_ENV    
+
+      - name: Set Output git branch
+        id: gitbranch_cmd_output
+        run: echo git_branch=${GITHUB_REF#refs/heads/} 
+
+      - name: Build the Docker image
+        env: 
+          TAG_VERSION:  ${{ steps.githash_env_output.outputs.git_hash}}  # 8
+          DOCKER_USER: "love7310"  #"love7310@naver.com"
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKER_PASSWORD: "rlawnsdud#08"
+        run: docker build . --file Dockerfile --tag love7310/virtlet:${{ env.git_hash }}   #  env.TAG_VERSION <= 값이 없음..
+
+
+
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        env:
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        with:
+          username: "love7310" #${{ env.DOCKER_USER }}
+          #password: ${{ secrets.DOCKER_PASSWORD }}
+          #username: $DOCKER_USER  # "love7310"    x:  ${{ DOCKER_USER }}  x: ${DOCKER_USER} x: $DOCKER_USER
+          password: "rlawnsdud#08"
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: love7310/virtlet
+
+
+      - name: Docker push
+        id: docker-push
+        run: docker push love7310/virtlet:${{ env.git_hash }}
+
+
+  to_gitlab:
+    runs-on: ubuntu-latest
+    steps:     
+      - name: helm repository
+        run: ls ~/*
+      - run: ls -al
+      - run: pwd
+#      - run: git branch -l
+#      - run: git remote -v
+
+      #! - name: git hand
+      #!   run: |
+      #!     mkdir -p ~/.ssh
+      #!     echo "$GHUB_PRIVATE_SSH_KEY"          
+      #!     echo "${{ secrets.GHUB_PRIVATE_SSH_KEY }}" > ~/.ssh/id_rsa
+
+      #!     chmod 600 ~/.ssh/id_rsa
+      #!     ls ~/.ssh/*
+      #!     sudo ssh -T git@github.com
+
+#          echo "gitlab.aiops-mz.com,13.215.1.33 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNdTXTaRfrTL5Yqmf5bu2yxJ/WDhK1Bky/uoVXBa7jWO8dxHaiftwXVeN/Qk90lVXlrmfpNWe+SGge8JU01vj3s=" > ~/.ssh/known_hosts
+#          chmod 600 ~/.ssh/known_hosts
+
+
+#echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+#          echo "gitlab.aiopsmz-com $GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/known_hosts
+
+#          sed -i 's/root@su.cluster.local/ /g' ~/.ssh/id_rsa
+#          sudo ssh -T git@gitlab.aiops-mz.com
+
+
+      - name: helm repository image update
+        uses: actions/checkout@v3
+        with: 
+          repository: k4korea/su-argo
+#          path: service/virtlet/dev/values.yaml
+          ref: main
+          ssh-key: ${{ secrets.GHUB_PRIVATE_SSH_KEY }}
+          persist-credentials: false
+          submodules: true
+          github-server-url: 'https://github.com/k4korea/su-argo.git'
+
+      - run: |
+         ls -al service/virtlet/dev/*
+         
+         ls -al
+         cat ./service/virtlet/dev/values.yaml
+         echo ${{ env.git_hash }}
+        
+      
+#  tag: "90faee8"  # 4-> 3x -> 2 x
+
+
+  
+
+  #! to_gitlab:
+  #!   runs-on: ubuntu-latest
+  #!   steps:                                              # <-- must use actions/checkout before mirroring!
+  #!     - uses: actions/checkout@v3
+  #!       with:
+  #!         fetch-depth: 0
+  #!     - name: gitlab connection
+  #!       env: 
+  #!         GITLAB_SSH_PRIVATE_KEY: ${{ secrets.GITLAB_SSH_PRIVATE_KEY }}
+  #!       run: |          
+  #!         mkdir -p ~/.ssh
+  #!         echo "$GITLAB_SSH_PRIVATE_KEY"          
+  #!         echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDg5rpdUHFFO8i4vTI9iLPIdz+RSW4RNjAlAzb2DIaRFBOKdFsARopSS+L4TUVPjRhh5tqzPNo7UCFs1RSCQsDyvE8u1bJuu229iCbfFEplapoIw1r9vH5NYEjBerIJiLZj8bW5+7b0soYvNiIYpaAhlwSscRDFIYrkUDstgY9b1nQeRbrHjJ8YgVeDUK6yz56YOKRm1/WzAjfpJCyWjF2TW9qDGpoMFqNlzl04YnE5p/Kp/DC3JSaZDNtCAmxNAYQK8NxOPvYWPQzCaER3cd2T5lGBUJJSTMbI83eaOsqQRVfEHoYpiLkLOmvH4m1P3d9AfgzbU1xpGllcjpsgg9/H root@su.cluster.local" > ~/.ssh/id_rsa
+  #!         echo "gitlab.aiops-mz.com,13.215.1.33 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNdTXTaRfrTL5Yqmf5bu2yxJ/WDhK1Bky/uoVXBa7jWO8dxHaiftwXVeN/Qk90lVXlrmfpNWe+SGge8JU01vj3s=" > ~/.ssh/known_hosts
+  #!         chmod 600 ~/.ssh/id_rsa
+  #!         chmod 600 ~/.ssh/known_hosts
+  #!         ls ~/.ssh/*
+  #!         sudo ssh -T git@gitlab.aiops-mz.com
+
+
+#echo "$GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+#          echo "gitlab.aiopsmz-com $GITLAB_SSH_PRIVATE_KEY" > ~/.ssh/known_hosts
+
+#          sed -i 's/root@su.cluster.local/ /g' ~/.ssh/id_rsa
+#          sudo ssh -T git@gitlab.aiops-mz.com
+#          cd ~/
+#          git clone git@gitlab.aiops-mz.com:su/su-project.git
+#          cd su-project 
+#          ls
+
+#!       - uses: pixta-dev/repository-mirroring-action@v1
+#!         with:
+#!           target_repo_url: git@gitlab.aiops-mz.com:su/su-project.git
+#! #          target_repo_url: skycloud@megazone.com@gitlab.aiops-mz.com:su/su-project.git            
+#!           ssh_private_key: ${{ secrets.GITLAB_SSH_PRIVATE_KEY }}
+#!           ssh_username: ${{ secrets.CODECOMMIT_SSH_PRIVATE_KEY_ID }}
+
+#!   to_codecommit:                                        # <-- different jobs are executed in parallel.
+#!     runs-on: ubuntu-latest
+#!     steps:
+#!       - uses: actions/checkout@v3
+#!         with:
+#!           fetch-depth: 0
+#!       - uses: pixta-dev/repository-mirroring-action@v1
+#!         with:
+#!           target_repo_url: ssh://skycloud@megazone.com@gitlab.aiops-mz.com:su/su-project.git
+#! #            #ssh://git-codecommit.<somewhere>.amazonaws.com/v1/repos/<target_repository_name>
+        
+#!           ssh_private_key:
+#!             ${{ secrets.CODECOMMIT_SSH_PRIVATE_KEY }}
+#!           ssh_username: ${{ secrets.CODECOMMIT_SSH_PRIVATE_KEY_ID }}
+#!                            # <-- (for codecommit) you need to specify ssh-key-id as ssh username.            
+
+
+      - name: helm git ls
+        id: helm-git
+        run: ls
+      
+
+
+      #! - name: helm image update
+      #!   id: helm-image-update
+      #!   uses: actions/checkout@v3
+      #!   with:
+      #!     fetch-depth: 0
+        
+      #!   with:
+      #!     repository: https://gitlab.aiops-mz.com/su/su-project.git
+      #!     ref: /heads/main
+      #!     token: eyBPEmH9kr5Cs_1MkoD2 #${{ secrets.my_pat }}
+
+
+        
+        
+
+      
+      #! - name: Build and push Docker image
+      #!   env:
+      #!     TAG_VERSION:  ${{ steps.githash_cmd_output.outputs.git_hash}}
+      #!     BRANCH:       ${{ steps.vars_output.outputs.git_branch}}
+      #!   uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      #!   with:
+      #!     context: .
+      #!     push: true
+      #!     #tags: ${{ steps.vars_output.outputs.git_hash }}
+      #!     tags: 7  #${{ env.git_hash }} #${{ steps.githash_cmd_output.outputs.git_hash}}  #${{ env.TAG_VERSION }}
+      #!     labels: ${{ steps.meta.outputs.labels }}        
+#          #! DOCKER_USER: ${{ secrets.DOCKER_USER }}
+#          #! DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+#          #! DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+#          #DOCKER_TAG: "7"                     
+
+
+
+#!       #  결론은 한개만 된다 output 
+#!       - name: variable test
+#!         id : var_test
+#!         env:
+#!           docker_tag: "7"
+#!         run: |
+#!           A1="100"
+#!           A2=200
+#!           echo $(A1)
+#!           echo "::set-output name=A1::$(echo $(A1))" 
+#! #          echo "::set-output name=A2::$(echo $(A2))" 
+#! #          echo "::set-output name=set_innser_docker_tag::inner-data" 
+#! #          echo "::set-output name=set_echo_docker_tag::$(echo ${docker_tag})" 
+#! #          echo ${{ env.docker_tag }}  # FAIL 7
+#! #          echo "::set-output name=set_docker_tag::${docker_tag}"  안됨
+#! #          ## env 에다 변수를 넣어야 하나.
+#! #          echo $docker_tag  # OK 7          
+        
+#!       - name: get_output
+#!         run: >-
+#!           echo ${{ steps.var_test.outputs.set_docker_tag }}
+          
+
+#!       - name: get_output2
+#!         run: echo ${{ steps.var_test.outputs.set_echo_docker_tag }}          
+      
+#!       - name: get_output3
+#!         run: echo ${{ steps.var_test.outputs.set_innser_docker_tag }}          
+
+#!       #! - name: get_output4
+#!       #!   run: echo toJson(${{ steps.var_test.outputs }})  #jsong -> toJson
+
+#!       - name: get_output_A1
+#!         run: echo ${{ steps.var_test.outputs.A1 }}
+#!       - name: get_output_A2
+#!         run: echo ${{ steps.var_test.outputs.A2 }}
+
+
+#!       - id: set-foo
+#!         run: echo "::set-output name=foo::bar"
+#!       - run: echo ${{ steps.set-foo.outputs.foo }}        
