@@ -1,8 +1,6 @@
 {
   "name": "simple-page",
   "version": "1.0.0",
-  "description": "",
-//  "private": true,
   "main": "index.js",
   "author": "",
   "license": "ISC",
