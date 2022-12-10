@@ -11,7 +11,7 @@
   "description": "1. start kube yaml\r   command: [\"node\"]\r   args: [\"index.js\"]    ######  deploy-rollout node",
   "devDependencies": {},
   "scripts": {
-    "test": "jest"
+    "test": ""
   },
   "repository": {
     "type": "git",
