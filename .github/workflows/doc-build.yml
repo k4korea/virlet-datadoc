@@ -49,9 +49,9 @@ jobs:
       - name: Build the Docker image
         env: 
           TAG_VERSION:  ${{ steps.githash_env_output.outputs.git_hash}}  # 8
-          DOCKER_USER: "love7310"  #"love7310@naver.com"
+          DOCKER_USER: ${{ secrets.DOCKER_USER }} #"love7310"  
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKER_PASSWORD: "rlawnsdud#08"
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} #"love7310"   "rlawnsdud#08"
         run: docker build . --file Dockerfile --tag love7310/virtlet:${{ env.git_hash }}   #  env.TAG_VERSION <= 값이 없음..
 
 
