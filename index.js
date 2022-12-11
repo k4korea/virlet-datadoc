@@ -5,7 +5,7 @@ var app = express();
 //import './tracer'; 
 
 
-const tracer = require('dd-trace').init();
+//const tracer = require('dd-trace').init();
 
 app.get('/index',function(req,res){
     fs.readFile('index.html', function(error, data){
@@ -30,6 +30,8 @@ app.get('/imgs',function(req,res){
     });
     
 });
+
+require('dd-trace').init(app);
 
 app.listen( 80, function(){
     console.log('Server Start');
